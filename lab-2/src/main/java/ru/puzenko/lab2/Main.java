@@ -1,39 +1,55 @@
 package ru.puzenko.lab2;
 
 import ru.puzenko.lab2.entity.Building;
-import ru.puzenko.lab2.repository.BuildingRepositoryJdbc;
+import ru.puzenko.lab2.repository.JdbcBuildingRepository;
+
+import java.io.InputStream;
+import java.util.Properties;
 
 public class Main {
     public static void main(String[] args) {
-        String url = "jdbc:postgresql://localhost:5432/bd_lab2";
-        String user = "lab2user";
-        String password = "sonita2005alisa2009";
+        Properties props = new Properties();
+        try (InputStream is = Main.class.getClassLoader().getResourceAsStream("database.properties")) {
+            if (is == null) {
+                throw new RuntimeException("Файл database.properties не найден в resources!");
+            }
+            props.load(is);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при чтении настроек БД", e);
+        }
 
-        BuildingRepositoryJdbc repo = new BuildingRepositoryJdbc(url, user, password);
+        String url = props.getProperty("db.url");
+        String user = props.getProperty("db.user");
+        String password = props.getProperty("db.password");
 
-        repo.createTableIfNotExists();
+        JdbcBuildingRepository repository = new JdbcBuildingRepository(url, user, password);
+
+        repository.createTableIfNotExists();
 
         System.out.println("\n--- CREATE ---");
-        Building b = new Building(null, "ул. Ленина, 10", 5);
-        int id = repo.save(b);
-        System.out.println("Сохранено с id=" + id);
+        Building newBuilding = new Building(null, "ул. Ленина, 10", 5);
+        int id = repository.save(newBuilding);
+        System.out.println("Сохранено здание с id: " + id);
 
         System.out.println("\n--- READ (findById) ---");
-        System.out.println(repo.findById(id));
+        Building foundById = repository.findById(id);
+        System.out.println("Найдено: " + foundById);
 
         System.out.println("\n--- READ (findByAddress) ---");
-        System.out.println(repo.findByAddress("ул. Ленина, 10"));
+        Building foundByAddress = repository.findByAddress("ул. Ленина, 10");
+        System.out.println("Найдено по адресу: " + foundByAddress);
 
         System.out.println("\n--- READ (findAll) ---");
-        System.out.println(repo.findAll());
+        System.out.println("Все здания: " + repository.findAll());
 
         System.out.println("\n--- UPDATE ---");
-        b.setFloors(10);
-        System.out.println("Обновлено: " + repo.update(b));
-        System.out.println("После: " + repo.findById(id));
+        foundById.setFloors(10);
+        boolean updated = repository.update(foundById);
+        System.out.println("Обновлено? " + updated);
+        System.out.println("После обновления: " + repository.findById(id));
 
         System.out.println("\n--- DELETE ---");
-        repo.deleteById(id);
-        System.out.println("После удаления: " + repo.findById(id));
+        repository.deleteById(id);
+        System.out.println("Удалено. Проверка: " + repository.findById(id));
     }
 }

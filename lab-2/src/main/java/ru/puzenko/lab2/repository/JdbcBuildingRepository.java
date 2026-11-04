@@ -6,19 +6,24 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BuildingRepositoryJdbc implements BuildingRepository {
+public class JdbcBuildingRepository implements BuildingRepository {
 
     private final String url;
     private final String user;
     private final String password;
 
-    public BuildingRepositoryJdbc(String url, String user, String password) {
+    public JdbcBuildingRepository(String url, String user, String password) {
         this.url = url;
         this.user = user;
         this.password = password;
     }
 
     private Connection getConnection() throws SQLException {
+        try {
+            Class.forName("org.postgresql.Driver"); // Принудительно загружаем драйвер
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("Драйвер PostgreSQL не найден в classpath!", e);
+        }
         return DriverManager.getConnection(url, user, password);
     }
 
@@ -30,7 +35,7 @@ public class BuildingRepositoryJdbc implements BuildingRepository {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
-            System.out.println("Таблица building готова.");
+            System.out.println("Таблица building готова к работе.");
         } catch (SQLException e) {
             throw new RuntimeException("Ошибка при создании таблицы", e);
         }
@@ -51,7 +56,7 @@ public class BuildingRepositoryJdbc implements BuildingRepository {
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Ошибка при сохранении", e);
+            throw new RuntimeException("Ошибка при сохранении здания", e);
         }
         return -1;
     }
@@ -63,7 +68,9 @@ public class BuildingRepositoryJdbc implements BuildingRepository {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) return mapRow(rs);
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Ошибка при поиске по id", e);
@@ -78,7 +85,9 @@ public class BuildingRepositoryJdbc implements BuildingRepository {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, address);
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) return mapRow(rs);
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Ошибка при поиске по адресу", e);
@@ -93,9 +102,11 @@ public class BuildingRepositoryJdbc implements BuildingRepository {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) buildings.add(mapRow(rs));
+            while (rs.next()) {
+                buildings.add(mapRow(rs));
+            }
         } catch (SQLException e) {
-            throw new RuntimeException("Ошибка при получении всех", e);
+            throw new RuntimeException("Ошибка при получении всех зданий", e);
         }
         return buildings;
     }
@@ -108,9 +119,10 @@ public class BuildingRepositoryJdbc implements BuildingRepository {
             pstmt.setString(1, building.getAddress());
             pstmt.setInt(2, building.getFloors());
             pstmt.setInt(3, building.getId());
-            return pstmt.executeUpdate() > 0;
+            int updatedRows = pstmt.executeUpdate();
+            return updatedRows > 0;
         } catch (SQLException e) {
-            throw new RuntimeException("Ошибка при обновлении", e);
+            throw new RuntimeException("Ошибка при обновлении здания", e);
         }
     }
 
@@ -122,11 +134,15 @@ public class BuildingRepositoryJdbc implements BuildingRepository {
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Ошибка при удалении", e);
+            throw new RuntimeException("Ошибка при удалении здания", e);
         }
     }
 
     private Building mapRow(ResultSet rs) throws SQLException {
-        return new Building(rs.getInt("id"), rs.getString("address"), rs.getInt("floors"));
+        return new Building(
+                rs.getInt("id"),
+                rs.getString("address"),
+                rs.getInt("floors")
+        );
     }
 }
