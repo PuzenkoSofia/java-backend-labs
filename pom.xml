@@ -16,7 +16,6 @@
         <hikaricp.version>5.1.0</hikaricp.version>
     </properties>
 
-    <!-- ВОТ ЭТОТ БЛОК НУЖНО ДОБАВИТЬ -->
     <dependencyManagement>
         <dependencies>
             <dependency>
