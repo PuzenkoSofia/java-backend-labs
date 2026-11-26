@@ -14,10 +14,21 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <postgresql.version>42.7.5</postgresql.version>
         <hikaricp.version>5.1.0</hikaricp.version>
+        <spring-boot.version>3.2.5</spring-boot.version>
+        <testcontainers.version>1.19.7</testcontainers.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
@@ -34,6 +45,7 @@
     <modules>
         <module>lab-1</module>
         <module>lab-2</module>
+        <module>lab-3</module>
     </modules>
 
 </project>
