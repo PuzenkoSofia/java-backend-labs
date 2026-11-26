@@ -1,11 +1,13 @@
 package ru.puzenko.lab3.repository;
 
+import org.springframework.stereotype.Repository;
 import ru.puzenko.lab3.model.Building;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public class BuildingRepositoryJdbc implements BuildingRepository {
     private final String url;
     private final String user;

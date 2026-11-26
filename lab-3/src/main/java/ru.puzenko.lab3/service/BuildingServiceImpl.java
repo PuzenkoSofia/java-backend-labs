@@ -9,36 +9,36 @@ import java.util.List;
 @Service
 public class BuildingServiceImpl implements BuildingService {
 
-    private final BuildingRepository buildingRepository;
+    private final BuildingRepository repository;
 
-    public BuildingServiceImpl(BuildingRepository buildingRepository) {
-        this.buildingRepository = buildingRepository;
+    public BuildingServiceImpl(BuildingRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public int save(Building building) {
-        return buildingRepository.save(building);
+        return repository.save(building);
     }
 
     @Override
     public Building findById(int id) {
-        return buildingRepository.findById(id)
+        return repository.findById(id)
                 .orElseThrow(() -> new BuildingNotFoundException("Building with id " + id + " not found"));
     }
 
     @Override
     public List<Building> findAll() {
-        return buildingRepository.findAll();
+        return repository.findAll();
     }
 
     @Override
     public void update(Building building) {
         findById(building.getId());
-        buildingRepository.update(building);
+        repository.update(building);
     }
 
     @Override
     public void deleteById(int id) {
-        buildingRepository.deleteById(id);
+        repository.deleteById(id);
     }
 }
