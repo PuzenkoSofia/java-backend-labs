@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class BuildingRepositoryJdbc implements BuildingRepository {
+public class JdbcBuildingRepository implements BuildingRepository {
     private final String url;
     private final String user;
     private final String password;
 
-    public BuildingRepositoryJdbc(String url, String user, String password) {
+    public JdbcBuildingRepository(String url, String user, String password) {
         this.url = url;
         this.user = user;
         this.password = password;
